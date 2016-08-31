@@ -167,6 +167,7 @@ setMethod("spc.plot.depth.overlay", "SpcList", function (object, X, lab_cex, ...
 #########################################################################
 # Method : subset
 #########################################################################
+#desciption was created in Spectra method and mentioned in there
 #The argument "select" is not implemented yet. Use "[]"
 setMethod("subset",  signature="SpcList",
 		definition=function(x, subset, select, drop = FALSE, ...) {                   
@@ -210,6 +211,21 @@ setMethod("subset",  signature="SpcList",
 #########################################################################
 # Method : names
 #########################################################################
+#' The Names of a \code{Spclist} object
+#'
+#' @description
+#'  Retrieve  the names of \code{Spclist} object 
+#'  
+#' @usage 
+#' names(x)
+#'
+#' @param  x  a \code{Spclist} object
+#' @examples
+#' 
+#' sp <- spc.example_spectra() 
+#' BL = spc.makeSpcList(sp,"STATION")
+#' names(BL)
+#' 
 setMethod("names", "SpcList", function(x){
 			sapply(x, function(mobject) {
 						if(class(mobject)=="Spectra") mobject@ShortName[1]	else class(mobject) 
@@ -219,6 +235,32 @@ setMethod("names", "SpcList", function(x){
 #########################################################################
 # Method : $
 #########################################################################
+#' Extract or replace parts of a Spclist object
+#'
+#' @description
+#' Operators acting on  \code{Spclist} objects  to extract or replace parts
+#' 
+#' @usage 
+#' x[i] 
+#' x[i, j] 
+#' x[[i]] 
+#' x$i #More usage cases to be added
+#' 
+#' 
+#' @param \code{Spclist} object from which to extract element(s) or in which to replace element(s)
+#' @param i A numeric (row index) variable
+#' @param j A character (column name) or a numeric (column index) variable
+#' 
+#'
+#' @examples
+#'  sp<-spc.example_spectra()
+#'  BL = spc.makeSpcList(sp,"STATION")
+#'  # names() is used to show that a_nap ,  
+#'  names(BL)
+#'  BL$a_nap
+#'  BL["a_nap"]
+#'  
+#' 
 setMethod("$", signature = "SpcList", 
 		function(x, name) {
 			myn = names(x)
@@ -230,6 +272,27 @@ setMethod("$", signature = "SpcList",
 #########################################################################
 # Method : show
 #########################################################################
+#' Show a Spclist object
+#'
+#' @description
+#' Display a \code{Spclist} object 
+#'
+#' @usage 
+#' show(x)
+#' # or 
+#' x
+#' @param x a \code{Spclist} object 
+#' @return  show returns an invisible \code{NULL}
+#'
+#' 
+#' 
+#'
+#' @examples
+#' x <- spc.example_spectra()
+#' BL = spc.makeSpcList(x,"STATION")
+#' show(BL)
+#' 
+#' 
 setMethod("show", "SpcList", function(object){
 			if(length(object)>0)
 				sapply(1:length(object), function(x) {
@@ -249,8 +312,19 @@ setMethod("show", "SpcList", function(object){
 #########################################################################
 # Constructor function : SpcList()
 #########################################################################
-SpcList = function (spclist){
-	new("SpcList", spclist)
+#' Construction a Spclist object
+#'
+#' @description
+#' Create a \code{Spclist} object by using list of \code{Spactra} object
+#'
+#' 
+#' @param listofsp A \code{Spclist} object 
+#' @examples 
+#' sp$CLASS = factor(c(rep("c",12), rep("a",6), rep("b",8)))
+#' sp$CLASS 
+#' SpcList(sp$CLASS)
+SpcList = function (listofsp){
+	new("SpcList", listofsp)
 }
 #########################################################################
 # Method : spc.invalid.detect
@@ -263,6 +337,27 @@ setMethod("spc.invalid.detect", signature = "list", def=function(source1){
 #########################################################################
 # Method : spc.getheader
 #########################################################################
+#' Extract a field of the header slot of a Spclist object
+#' @description
+#' Extracts the value of a field in the header slot of \code{Spclist} object
+#'
+#' @usage 
+#' spc.getheader(object,name)
+#'
+#' @seealso \code{\link{spc.setheader}}
+#' 
+#' @param object  A  \code{Spectra} object 
+#' @param name of the header field to be extracted
+#' 
+#' @examples 
+#' sp=spc.example_spectra()
+#' BL = spc.makeSpcList(sp,"STATION")
+#' BL = spc.data2header(BL,"Station","STATION", compress = T)
+#' spc.getheader(BL)
+#' #or
+#' spc.getheader(BL,"Station")
+
+#' 
 setMethod("spc.getheader", signature = "list", def = function (object,name){
 			sapply(object, spc.getheader,name)
 		})
@@ -270,16 +365,40 @@ setMethod("spc.getheader", signature = "list", def = function (object,name){
 #########################################################################
 # Method : spc.setheader<-
 #########################################################################
-setReplaceMethod(f="spc.setheader", signature="list",
+#' Set a field of the header slot of a Spclist object
+#' @description
+#' This function sets or changes the header slot of each \code{Spectra} object within 
+#' \code{Spclist} object with provided list of SpcHeader objects. Both \code{object}
+#' and \code{value} must be of same lenght.
+#'
+#'@usage 
+#' spc.setheader(object)<-value
+#'
+#' @seealso \code{\link{spc.getheader}}
+#' @param object A \code{Spclist} object 
+#' @param value A list of SpcHeader objects to be set
+#' @examples 
+#' sp=spc.example_spectra()
+#' BL = spc.makeSpcList(sp,"STATION")
+#' a=new("SpcHeader") # create new SpcHeader object
+#' #Make 4 copies of the SpcHeader object, with different 'Station' fields
+#' new_headers = lapply(1:length(a), function(x) a)
+#' new_headers = lapply(1:length(new_headers), function(x) {new_headers[[x]]$Station=paste0("Station",x); new_headers[[x]]})
+#' new_headers
+#' #Replace the 'Station' field of each Spectra object in the SpcList
+#' spc.setheader(BL,"Station") <- new_headers
+#' spc.getheader(BL,"Station")
+setReplaceMethod(f="spc.setheader", signature=c("list","list"),
 		definition=function(object,value,...){
 			if(inherits(value,"Spectra"))
 				stop("It is forbidden to set a SpcHeader an object that inherits from the Spectra class")
-			if(length(value)==1)
-				value = rep(value,length(object))
-			stopifnot(length(value)==length(object))			
 			
-			a=sapply(1:length(object), function(x) {
-						object[[x]] = spc.setheader(object[[x]],value[x])
+		  stopifnot(length(value)==length(object))			
+			stopifnot(all(sapply(value, class)=="SpcHeader"))
+			
+			a=lapply(1:length(object), function(x) {
+						spc.setheader(object[[x]]) <<- value[[x]]
+						object
 					})
 			validObject(object)
 			return(object)
@@ -287,6 +406,28 @@ setReplaceMethod(f="spc.setheader", signature="list",
 #########################################################################
 # Method : spc.updateheader<-
 #########################################################################
+#' Update a field of the header slot of a Spclist object
+#' @description
+#'  Updates or changes the value of a field in the header slot of \code{Spclist} object 
+#'
+#' @usage 
+#' spc.updateheader(onject,name)<-value
+#'
+#' @param object A \code{Spectra} objec 
+#' @param name of the header field to be updated
+#' @examples 
+#' sp=spc.example_spectra()
+#' BL = spc.makeSpcList(sp,"STATION")
+#' spc.getheader(BL)
+#' spc.updateheader(BL,"Station")<-11
+#' spc.getheader(BL)
+#' ###################################
+#' #Extract the maximum depth for each station and store it in header field 'MaxDepth'
+#' BL=lapply(BL, function(x) {
+#' spc.updateheader(x, "MaxDepth")<-max(x$DEPTH)
+#'   x
+#' })
+#' spc.getheader(BL,"MaxDepth")
 setReplaceMethod(f="spc.updateheader", signature="list",
 		definition=function(object,Name,value,...){
 			if(inherits(value,"Spectra"))
@@ -305,37 +446,129 @@ setReplaceMethod(f="spc.updateheader", signature="list",
 #########################################################################
 # Method : spc.data2header
 #########################################################################
+#' Populate fields of header slot of a Spclist object  using data from data slot 
+#' @description
+#' Populates a field of header of a Spclist object with a column data from data slot.
+#'
+#' @usage 
+#' spc.data2header(object,dataname,headerfield,compress)
+#'
+#' 
+#' @param dataname A character object specifying the name of data column to be used
+#' @param object \code{Spclist} object 
+#' @param compress true or false
+#' @param headerfield A character object specifying the name of the header field to be changed
+#'  
+#' @return object of class \code{Spclist}
+#' @details 
+#' This function extracts data from a column of the @data slot (specified by dataname)  
+#' and creates a new header of a Spclist object field with it. If headerfield is not provided, the name 
+#' of the new header field will be the same as dataname. 
+#' The name of the new header field can be overwritten by providing headerfield.
+#' If all the incoming data rows (dataname) are the same, information put into the header 
+#' can be compressed by selecting compress=TRUE (default is FALSE). This would take only the first element 
+#' from the @data column.
+#' 
+#' @examples 
+#' sp=spc.example_spectra()
+#' BL = spc.makeSpcList(sp,"STATION")
+#' BL=spc.data2header(BL,"CRUISE")
+#' spc.getheader(BL,"CRUISE")
+#' spc.getheader(BL)
+#' BL=spc.data2header(BL,"CAST","ProjectCast",compress = F)
+#' spc.getheader(BL,"ProjectCast")
+#' 
 setMethod("spc.data2header", signature = "list", 
 		def=function(object,dataname,headerfield,compress=TRUE,...){
-			temp = lapply(object, spc.data2header, headerfield,dataname,compress,...)
+		  if(missing(headerfield))
+		    headerfield = dataname
+		  
+			temp = lapply(object, spc.data2header, dataname, headerfield,compress,...)
 			object@.Data=temp
 			return(object)
 		})
 #########################################################################
 # Method : sort
 #########################################################################
-setMethod("sort", signature="list", definition= function (x, which.col, decreasing = FALSE, ...){
-			newdata = lapply(x, sort, which.col=which.col, decreasing=decreasing, ...)
-			x@.Data = newdata
-			return(x)
-		})
+#' Sort a Spclist object
+#' @description
+#' Sort \code{Spclist} objects into ascending or descending order.
+#' 
+#' @return Returns a \code{Spclist} object
+#' @param x A \code{Spclist} object
+#' @param which.col A number or name of column and default is that decreaing is False
+#' @examples 
+#' sp=spc.example_spectra()
+#' BL = spc.makeSpcList(sp,"STATION")
+#' p=sort(BL,"anap_301", decreasing = TRUE)
+#' p[[2]]$anap_301
+#' #or 
+#' p=sort(BL,"anap_301", decreasing = FALSE)
+#' p[[2]]$anap_301
+setMethod("sort", signature="list", definition= function (x, decreasing = FALSE, which.col, ...){
+  newdata = lapply(x, sort, which.col=which.col, decreasing=decreasing, ...)
+  x@.Data = newdata
+  return(x)
+})
 
 #########################################################################
 # Method : spc.lapply
 #########################################################################
+#' Apply a function over  a Spclist object
+#' @description
+#' spc.lapply returns a list of the same length as a \code{Spectra} object, each element of which is the result of applying FUN to the corresponding element of \code{Spectra} object.
+#' @param X A \code{Spectra} object
+#' @param FUN The function to be applied to each element of \code{Spectra} object
+#' @param ... Optional arguments to FUN.
+#' @examples 
+#' sp=spc.example_spectra() 
+#' BL = spc.makeSpcList(sp,"STATION")
+#' BL2=spc.lapply(BL, function(x) x=x+1)
+#' class(BL2)
+#'  BL2@by
+#'  # if we use spc.lapply(), we keep @by slot but if we use lapply(), we lose it
+#'  BL2=lapply(BL, function(x) x=x+1)
+#'  class(BL2)
+#'  
 setGeneric (name= "spc.lapply",
 		def=function(X, FUN,...){standardGeneric("spc.lapply")})
 setMethod("spc.lapply", signature="SpcList", definition= function (X, FUN, ...) {
 			by = X@by
 			X = lapply(as(X,"list"),FUN,...)
-			X = as(X, "SpcList")
-			X@by = by
+			if (all(sapply(X, class)=="Spectra")) {
+			  X = as(X, "SpcList")
+			  X@by = by
+			}
 			validObject(X)
 			return(X)
 		})
 #########################################################################
 # Method : spc.header2data
 #########################################################################
+#' Get header slot of a Spclist object for data
+#' @description
+#' Get  the header slot of a \code{Spclist} object for data of each element  with a column
+#'
+#' @usage 
+#' spc.data2header(object,headerfield,dataname )
+#'
+#' 
+#' @param dataname A character object specifying the name of data column to be used
+#' @param object A \code{Spclist} object 
+#' @param headerfield  A character object specifying the name of the header field 
+#' @param compress true or false
+#' @details 
+#' If header element has length >1, its type is checked. If it is "character",
+#' its elements will be pasted using paste(...,collapse="|"). If it is another 
+#' type, only the first element will be taken.  
+#' 
+#' @examples 
+#' sp=spc.example_spectra()
+#' BL = spc.makeSpcList(sp,"STATION")
+#' BL=spc.data2header(BL,"CRUISE")
+#' spc.getheader(BL,"CRUISE")
+#' spc.header2data(BL,"CRUISE")
+#' 
 .h2d = function(object,headerfield,dataname,compress=TRUE,...) {
 	if(missing(dataname))
 		dataname=headerfield	
